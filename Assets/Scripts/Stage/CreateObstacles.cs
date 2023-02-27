@@ -53,23 +53,18 @@ public class CreateObstacles : MonoBehaviour
         int allBlocks = BLOCK_NUM * BLOCK_NUM;
         List<int> garbageList = new List<int>();
 
-        for (int i = 0; i < allBlocks; i++) 
+        for (int i = 0; i < allBlocks - 1; i++) 
         {
             birdsList.Add(i);
         }
 
         for (int j = 0; j < num; j++)
         {
-            int rand = Random.Range(0, allBlocks);
+            int index = Random.Range(0, birdsList.Count);
 
-            garbageList.Add(rand);
+            int rand = birdsList[index];
 
-            //while(!CompareNum(rand, garbageList))
-            //{
-            //    rand = Random.Range(0, allBlocks);
-            //}
-
-            for(int y = 0; y < BLOCK_NUM; y ++)
+            for (int y = 0; y < BLOCK_NUM; y ++)
             {
                 for(int x = 0; x < BLOCK_NUM; x++)
                 {
@@ -77,21 +72,8 @@ public class CreateObstacles : MonoBehaviour
                 }
             }
 
-            //birdsList.RemoveAt(rand);
+            birdsList.RemoveAt(index);
         }
-    }
-
-    bool CompareNum(int num, List<int> list)
-    {
-        for(int i = 0; i < list.Count - 1; i++)
-        {
-            if(num == list[i])
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     void GenerateBirds(GameObject birdPref, GameObject[] pos, bool[,] field)
