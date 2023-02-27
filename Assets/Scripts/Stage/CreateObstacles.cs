@@ -10,10 +10,11 @@ public class CreateObstacles : MonoBehaviour
     //鳥を生成する位置(シーン上で調整するほうがやりやすい)
     [SerializeField] private GameObject[] _birdPos;
 
-    private readonly Field[,] FIELD = new Field[4, 4]; 
-
     //何×何マスにするか
     private readonly int BLOCK_NUM = 4;
+
+    //何羽生成するか
+    private readonly int BIRDS_NUM = 7;
 
     private bool[,] _field;
 
@@ -28,7 +29,7 @@ public class CreateObstacles : MonoBehaviour
     void CreateStage()
     {
         InitializeFirld();
-        SetBirds(6, _field, _birdsNum);
+        SetBirds(BIRDS_NUM, _field, _birdsNum);
         GenerateBirds(_birdPref, _birdPos, _field);
     }
 
