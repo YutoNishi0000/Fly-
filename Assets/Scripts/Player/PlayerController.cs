@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : Actor
 {
     private Rigidbody _rb;      //重力
-    private readonly float MOVE_SPEED_Z = 3;      //Z軸方向の移動速度 
+    private readonly float MOVE_SPEED_Z = 10;      //Z軸方向の移動速度 
     private readonly float MOVE_SPEED_X;      //X軸方向の移動速度 
     private readonly float MOVE_SPEED_Y;      //Y軸方向の移動速度 
     private readonly float DIS_CAMERA = 4;      //Y軸方向の移動速度 
@@ -46,7 +46,7 @@ public class PlayerController : Actor
         //マウスのワールド座標を取得
         Vector3 playerDirection = GetMouseInput();
         //Z軸方向にスピードを加算し、プレイヤーの最終的な移動位置を取得
-        playerDirection += new Vector3(0, 0, MOVE_SPEED_Z) * Time.deltaTime;
+        playerDirection += new Vector3(0, 0, GameManager.Instance.GetStageDifficultComponent().MOVE_SPEED) * Time.deltaTime;
         //実際にプレイヤーを移動
         transform.position = playerDirection;
         //プレイヤーを追従するためにカメラがいるべき座標を取得
@@ -179,6 +179,26 @@ public class PlayerController : Actor
                 _animator.SetBool("Left", false);
                 _animator.SetBool("Up", false);
                 break;
+        }
+    }
+
+    public float GetDistanceCamera()
+    {
+        return DIS_CAMERA;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Bird"))
+        {
+            Debug.Log("鳥！");
+            GameManager.Instance.Result();
+        }
+        else if (other.gameObject.CompareTag("Star"))
+        {
+            Debug.Log("星！");
+            GameManager.Instance.IncrementNumStars();
+            Debug.Log(GameManager.Instance.GetNumStars());
         }
     }
 }
