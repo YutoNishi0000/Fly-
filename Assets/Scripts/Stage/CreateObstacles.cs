@@ -26,22 +26,18 @@ public class CreateObstacles : MonoBehaviour
     void Start()
     {
         _field = new Field();
+        //自動的にオブジェクト配置を行う
         CreateStage();
-    }
-
-    private void Update()
-    {
-
     }
 
     void CreateStage()
     {
-        InitializeFirld(_field);
+        InitializeField(_field);
         SetBirds(GameManager.Instance.GetStageDifficultComponent().BIRDS_NUM, _field, _birdsNum);
         RenderObstacles(_birdPref, _starPref, _birdPos, _field);
     }
 
-    void InitializeFirld(Field field)
+    void InitializeField(Field field)
     {
         //インスタンス生成
         field.bird = new bool[BLOCK_NUM, BLOCK_NUM];
@@ -65,11 +61,14 @@ public class CreateObstacles : MonoBehaviour
 
         for (int i = 0; i < allBlocks - 1; i++) 
         {
+            //それぞれのブロックにアドレスを付ける
             birdsList.Add(i);
         }
 
+        //配置する鳥の数だけループする
         for (int j = 0; j < num; j++)
         {
+            //重複しないようにフラグを使ってどこに鳥を配置するのかランダムに決める
             int index = Random.Range(0, birdsList.Count);
 
             int rand = birdsList[index];
@@ -82,28 +81,33 @@ public class CreateObstacles : MonoBehaviour
                 }
             }
 
+            //印が付け終わった要素はリストから排除
             birdsList.RemoveAt(index);
         }
 
-        Debug.LogWarning(birdsList.Count);
-
+        //スターの配置は先ほど整理したリストの余った要素の中からランダムに取り出しスター配置の印を付ける
         int star = Random.Range(0, birdsList.Count);
 
         field.star[birdsList[star] % BLOCK_NUM, Mathf.FloorToInt(birdsList[star] / BLOCK_NUM)] = true;
     }
 
+    //オブジェクトを実際にSetBirds関数で付けた印をもとに生成する
     void RenderObstacles(GameObject birdPref, GameObject starPref, GameObject[] pos, Field field)
     {
         for(int y = 0; y < BLOCK_NUM; y++)
         {
             for (int x = 0; x < BLOCK_NUM; x++)
             {
+                //鳥の印がついていたら
                 if (field.bird[y, x])
                 {
+                    //鳥を生成
                     Instantiate(birdPref, pos[y * BLOCK_NUM + x].transform.position, birdPref.transform.rotation);
                 }
+                //星の印がついていたら
                 else if (field.star[y, x])
                 {
+                    //スターを生成
                     Instantiate(starPref, pos[y * BLOCK_NUM + x].transform.position, starPref.transform.rotation);
                 }
             }
@@ -114,7 +118,8 @@ public class CreateObstacles : MonoBehaviour
 //フィールドクラス
 public class Field
 {
-    public bool[,] bird;
-    public bool[,] star;
+    public bool[,] bird;     //鳥の印をつけるための二次元配列
+
+    public bool[,] star;    //スターの印をつけるための二次元配列
 }
 

@@ -2,6 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//オブジェクト基底クラス
+public class Actor : MonoBehaviour
+{
+    //プレイヤーのインスタンスを宣言
+    protected PlayerController Instance;
+
+    private void Awake()
+    {
+        //プレイヤーのインスタンスを取得
+        Instance = FindObjectOfType<PlayerController>();
+    }
+
+    public virtual void Move() { }
+}
+
+
 public class PlayerController : Actor
 {
     private Rigidbody _rb;      //重力
@@ -10,28 +26,35 @@ public class PlayerController : Actor
     private readonly float MOVE_SPEED_Y;      //Y軸方向の移動速度 
     private readonly float DIS_CAMERA = 4;      //Y軸方向の移動速度 
     private readonly float GET_MOUSE_TIME = 0.8f;      //何秒おきにプレイヤーの位置を更新するか
-    private Vector3 previousPos;
-    private Vector3 differenceMousePos;
+    private Vector3 previousPos;                   //更新前のプレイヤーの位置を取得
+    private Vector3 differenceMousePos;            //マウスがどれだけ動いたかを格納する
     private Animator _animator;
-    private AnimationState _animState;
-    private bool _getMousePos;
+    private bool _getMousePos;                    //マウスの位置を一フレームだけ取得したいときに使うフラグ
+    [SerializeField] private ParticleSystem star;  //スター取得時のエフェクト
+    [SerializeField] private AudioClip getStar;    //鳥にぶつかったときの音
+    [SerializeField] private AudioClip dead;      //鳥にぶつかったときの音
+    [SerializeField] private AudioSource audioSource;
+    private readonly float MAX_X_RIGHT = 1500;
+    private readonly float MIN_X_LEFT = 420;
+    private readonly float MAX_Y_TOP = 1080;
+    private readonly float MIN_Y_BUTTOM = 0;
 
     //アニメーションの状態
     private enum AnimationState
     {
-        Idle,
-        Right,
-        Left,
-        Up,
-        Down
+        Idle,     //何も動きがない状態
+        Right,    //右に進行中
+        Left,     //左に進行中
+        Up,       //上に進行中
+        Down      //下に進行中
     }
 
     void Start()
     {
         _animator = GetComponentInChildren<Animator>();
-        _animState = new AnimationState();
         AnimationTransion(AnimationState.Idle);
         _getMousePos = false;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -60,10 +83,49 @@ public class PlayerController : Actor
     {
         //マウスのスクリーン座標を取得
         var mousePos = Input.mousePosition;
-        //マウスのスクリーン座標からワールド座標を取得
-        var returnPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, DIS_CAMERA));
-        //マウスのワールド座標を返す
-        return returnPos;
+
+        //マウスカーソルの移動制限
+        if (mousePos.x <= MAX_X_RIGHT && mousePos.x >= MIN_X_LEFT && mousePos.y >= MIN_Y_BUTTOM && mousePos.y <= MAX_Y_TOP)
+        {
+            //マウスのスクリーン座標からワールド座標を取得
+            var returnPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, DIS_CAMERA));
+            //マウスのワールド座標を返す
+            return returnPos;
+        }
+        else
+        {
+            //マウスカーソルが制限範囲を超えてしまったときはプレイヤーの位置は制限範囲内に収まるようにする
+            float x;
+            float y;
+            if(mousePos.x <= MIN_X_LEFT)
+            {
+                x = MIN_X_LEFT;
+            }
+            else if(mousePos.x >= MAX_X_RIGHT)
+            {
+                x = MAX_X_RIGHT;
+            }
+            else
+            {
+                x = mousePos.x;
+            }
+
+            if(mousePos.y <= MIN_Y_BUTTOM)
+            {
+                y = MIN_Y_BUTTOM;
+            }
+            else if (mousePos.y >= MAX_Y_TOP)
+            {
+                y = MAX_Y_TOP;
+            }
+            else
+            {
+                y = mousePos.y;
+            }
+
+            var returnPos = Camera.main.ScreenToWorldPoint(new Vector3(x, y, DIS_CAMERA));
+            return returnPos;
+        }
     }
 
     //マウスが動いた方向のベクトルを取得
@@ -89,6 +151,7 @@ public class PlayerController : Actor
         }
     }
 
+    //プレイヤーの更新前の位置を取得するときに使うフラグを取得する関数
     void GetPreviousPos()
     {
         _getMousePos = false;
@@ -182,6 +245,7 @@ public class PlayerController : Actor
         }
     }
 
+    //カメラとプレイヤーとの距離を取得する関数
     public float GetDistanceCamera()
     {
         return DIS_CAMERA;
@@ -189,31 +253,24 @@ public class PlayerController : Actor
 
     private void OnTriggerEnter(Collider other)
     {
+        //鳥とぶつかったら
         if (other.gameObject.CompareTag("Bird"))
         {
-            Debug.Log("鳥！");
+            //リザルト画面に移行
             GameManager.Instance.Result();
+            //se再生
+            audioSource.PlayOneShot(dead);
         }
+        //スタートぶつかったら
         else if (other.gameObject.CompareTag("Star"))
         {
-            Debug.Log("星！");
+            //取得したスターの数を１増やす
             GameManager.Instance.IncrementNumStars();
-            Debug.Log(GameManager.Instance.GetNumStars());
+            //エフェクト再生(エフェクトは自動的に削除される)
+            Instantiate(star, transform);
+            star.Play();
+            //se再生
+            audioSource.PlayOneShot(getStar);
         }
     }
-}
-
-//オブジェクト基底クラス
-public class Actor : MonoBehaviour
-{
-    //プレイヤーのインスタンスを宣言
-    protected PlayerController Instance;
-
-    private void Awake()
-    {
-        //プレイヤーのインスタンスを取得
-        Instance = FindObjectOfType<PlayerController>();
-    }
-
-    public virtual void Move() { }
 }

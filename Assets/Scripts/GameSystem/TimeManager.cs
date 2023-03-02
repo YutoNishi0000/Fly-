@@ -13,17 +13,17 @@ public class TimeManager : MonoBehaviour
 
     void Update()
     {
-        //if (!GameManager.Instance.GetStageLockFlag())
-        {
-            _gameTime += Time.deltaTime;
-        }
+        //ƒQ[ƒ€ŠÔ‚ğæ“¾
+        _gameTime += Time.deltaTime;
     }
 
+    //ƒQ[ƒ€ŠÔ‚ğ‰Šú‰»
     public void InitializeTime()
     {
         _gameTime = 0;
     }
 
+    //ƒQ[ƒ€ŠÔ‚ğæ“¾
     public float GetGameTime()
     {
         return _gameTime;

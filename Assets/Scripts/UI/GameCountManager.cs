@@ -8,21 +8,14 @@ public class GameCountManager : MonoBehaviour
     [SerializeField] private Text Stars;
     [SerializeField] private Text PassTime;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
     void Update()
     {
+        //何個スターを表示したかを表示する
         UIController();
     }
 
     void UIController()
     {
         Stars.text = "x" + GameManager.Instance.GetNumStars();
-        PassTime.text = Mathf.FloorToInt(GameManager.Instance.timeManager.GetGameTime() / 60) + "分" + Mathf.FloorToInt(GameManager.Instance.timeManager.GetGameTime() % 60) + "秒";
     }
 }

@@ -4,24 +4,12 @@ using UnityEngine;
 
 public class Obstacles : Actor
 {
-    private bool onceflag;
-
-    private AutoStage autoStage;
-
-    private void Start()
-    {
-        autoStage = FindObjectOfType<AutoStage>();
-        onceflag = false;
-    }
-
     void Update()
     {
-        if(transform.position.z < Instance.transform.position.z - Instance.GetDistanceCamera() && !onceflag)
+        if(transform.position.z < Instance.transform.position.z - Instance.GetDistanceCamera())
         {
-            autoStage.IncrementStagePassCount();
-            Debug.Log("ステージインスリメント");
+            //プレイヤーのz座標が自身のz座標よりカメラのz座標が大きくなったら自身を消す
             Destroy(gameObject);
-            onceflag = true;
         }
     }
 }

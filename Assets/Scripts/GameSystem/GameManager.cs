@@ -4,6 +4,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+//インスタンスを生成する時コンストラクタで値を設定しやすくしたい
+public class StageDifficultyComponent
+{
+    public int STAGE_WIDTH;    //ステージの間隔
+    public float MOVE_SPEED;   //移動速度
+    public int BIRDS_NUM;      //生成する鳥の数
+
+    //コンストラクタ
+    public StageDifficultyComponent(int width, float speed, int birds)
+    {
+        STAGE_WIDTH = width;
+        MOVE_SPEED = speed;
+        BIRDS_NUM = birds;
+    }
+}
+
 public class GameManager : MonoBehaviour
 {
     #region シングルトン化
@@ -26,19 +42,14 @@ public class GameManager : MonoBehaviour
     #endregion
 
     private int numStars;      //星を何個取ったか
-
-    private bool StageLock;   //ステージ生成を行うかどうか
-
-    public TimeManager timeManager;
-
     private int numStage;    //今何ステージ目なのか
-
-    private int passCount;
-
-    private StageDifficultyComponent stage;
-
+    private int passCount;   //各ステートごとに一回だけしか処理をさせないときに使う
     private float SCORE;    //スコア
     private float HIGH_SCORE;    //ハイスコア
+
+    public TimeManager timeManager;
+    private StageDifficultyComponent stage;
+
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +57,6 @@ public class GameManager : MonoBehaviour
         numStars = 0;
         passCount = 0;
         numStage = 1;
-        StageLock = true;
         HIGH_SCORE = 0;
         timeManager = GetComponent<TimeManager>();
     }
@@ -62,7 +72,6 @@ public class GameManager : MonoBehaviour
         numStars = 0;
         passCount = 0;
         numStage = 1;
-        StageLock = true;
         timeManager.InitializeTime();
     }
 
@@ -108,10 +117,12 @@ public class GameManager : MonoBehaviour
 
                 //ゲームクリア
                 Result();
+                passCount++;
                 break;
         }
     }
 
+    //ゲームの難易度を管理するクラスのインスタンスを取得
     public StageDifficultyComponent GetStageDifficultComponent()
     {
         return stage;
@@ -125,6 +136,7 @@ public class GameManager : MonoBehaviour
 
     public void Result()
     {
+        //スコアを計算
         SCORE = CalScore(timeManager.GetGameTime(), numStars);
         //リザルト画面に移行
         SceneManager.LoadScene("Result");
@@ -136,36 +148,19 @@ public class GameManager : MonoBehaviour
         return Mathf.FloorToInt(time * numStar);
     }
 
+    //今取得している星の数を取得
     public int GetNumStars()
     {
         return numStars;
     }
 
-    public bool GetStageLockFlag()
-    {
-        return StageLock;
-    }
-
-    public void SetStageLockFlag(bool flag)
-    {
-        StageLock = flag;
-    }
-
-    public void GameStart()
-    {
-        StageLock = false;
-    }
-
-    public void NextStage(float gameTime)
-    {
-        gameTime = 0;
-    }
-
+    //今何ステージ目なのかを取得する
     public int GetStageNumber()
     {
         return numStage;
     }
 
+    //ステージ番号を１増やす
     public void IncrementStageNumber()
     {
         numStage++;
@@ -177,29 +172,15 @@ public class GameManager : MonoBehaviour
         return Mathf.FloorToInt(SCORE);
     }
 
+    //ハイスコアをセット
     public void SetHighScore(int score)
     {
         HIGH_SCORE = score;
     }
 
+    //ハイスコアを取得
     public float GetHighScore()
     {
         return HIGH_SCORE;
-    }
-}
-
-//インスタンスを生成する時コンストラクタで値を設定しやすくしたい
-public class StageDifficultyComponent
-{
-    public int STAGE_WIDTH;    //ステージの間隔
-    public float MOVE_SPEED;   //移動速度
-    public int BIRDS_NUM;      //生成する鳥の数
-
-    //コンストラクタ
-    public StageDifficultyComponent(int width, float speed, int birds)
-    {
-        STAGE_WIDTH = width;
-        MOVE_SPEED = speed;
-        BIRDS_NUM = birds;
     }
 }

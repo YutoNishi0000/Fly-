@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AutoStage : Actor
 {
@@ -15,7 +16,10 @@ public class AutoStage : Actor
     public static float generateTime;   //経過時間を格納する変数
     private readonly float STAGE_TIME = 15;
     private readonly float STAGE_COOL_TIME = 15;         //ステージ間の秒数
-    private int STAGE_PASS_COUNT;
+    [SerializeField] private Text stage;
+    [SerializeField] private Text explain;
+    [SerializeField] private GameObject frame;
+    private readonly float SHOW_TIME = 0.8f;     //実際にステージ生成させる何秒前に何ステージ目かを表すテキストを表示させるか
 
     private enum StageState
     {
@@ -32,6 +36,9 @@ public class AutoStage : Actor
         stageState = new StageState();
         generateTime = 0;
         StageIndex = FirstStageIndex - 1;
+        explain.enabled = true;
+        stage.enabled = false;
+        frame.SetActive(false);
     }
 
     void Update()
@@ -42,46 +49,53 @@ public class AutoStage : Actor
         //経過時間がクールタイムより小さかったら
         if (generateTime < STAGE_COOL_TIME)
         {
+            if(generateTime > STAGE_COOL_TIME - 1)
+            {
+                explain.enabled = false;
+                frame.SetActive(true);
+            }
+
             //ここから先の処理は行わせない
             return;
         }
         //クールタイムを過ぎてステージを生成することになったら
         else if (generateTime >= STAGE_COOL_TIME && generateTime <= (STAGE_COOL_TIME + STAGE_TIME))
         {
-            //特に何の処理も行わない
+            stage.enabled = true;
+            stage.text = "Level" + GameManager.Instance.GetStageNumber();
+
+            if (generateTime > (STAGE_COOL_TIME + SHOW_TIME))
+            {
+                stage.enabled = false;
+            }
         }
         //ステージを生成し終わったら
         else if(generateTime > (STAGE_COOL_TIME + STAGE_TIME))
         {
             generateTime = 0;
-            Invoke(nameof(NextStage), STAGE_COOL_TIME - 1);
+            Invoke(nameof(NextStage), STAGE_COOL_TIME - 3);
             return;
             //経過時間を初期化し、次のステージに移行
         }
 
-        int targetPosIndex = (int)(Target.position.z / GameManager.Instance.GetStageDifficultComponent().STAGE_WIDTH);
+        //今プレイヤーがどのブロックにいるか
+        int targetPosIndex = (int)(Instance.transform.position.z / GameManager.Instance.GetStageDifficultComponent().STAGE_WIDTH);
 
+        //もしも自動生成されるステージのブロックが今いるプレイヤーのブロックよりもAheadステージ分大きい場合
         if (targetPosIndex + aheadStage > StageIndex)
         {
             StageManager(targetPosIndex + aheadStage);
         }
     }
 
+    //次のステージの進むときに難易度を上げるための関数
     void NextStage()
     {
         GameManager.Instance.IncrementStageNumber();
     }
 
-    public void IncrementStagePassCount()
-    {
-        STAGE_PASS_COUNT++;
-    }
-
-    public int GetStagePassCount()
-    {
-        return STAGE_PASS_COUNT;
-    }
-
+    //ステージの生成を行う関数
+    //第一引数：今自分がいるブロック
     void StageManager(int maps)
     {
         if (maps <= StageIndex)
@@ -89,13 +103,15 @@ public class AutoStage : Actor
             return;
         }
 
-        for (int i = StageIndex + 1; i <= maps; i++)//指定したステージまで作成する
+        //指定したステージまで作成する
+        for (int i = StageIndex + 1; i <= maps; i++)
         {
             GameObject stage = MakeStage(i, GetStage(GetStageState(GameManager.Instance.GetStageNumber()), stagenum));
             StageList.Add(stage);
         }
 
-        while (StageList.Count > aheadStage + 1)//古いステージを削除する
+        //古いステージを削除する
+        while (StageList.Count > aheadStage + 1)
         {
             DestroyStage();
         }
@@ -103,13 +119,14 @@ public class AutoStage : Actor
         StageIndex = maps;
     }
 
-    GameObject MakeStage(int index, GameObject stageObj)//ステージを生成する
+    //ステージを生成する
+    GameObject MakeStage(int index, GameObject stageObj)
     {
-        GameObject stageObject = Instantiate(stageObj, new Vector3(0, 0, index * GameManager.Instance.GetStageDifficultComponent().STAGE_WIDTH + 2 * GameManager.Instance.GetStageDifficultComponent().STAGE_WIDTH), Quaternion.identity);
-
+        GameObject stageObject = Instantiate(stageObj, new Vector3(0, 0, GameManager.Instance.GetStageDifficultComponent().STAGE_WIDTH * (index + 2)), Quaternion.identity);
         return stageObject;
     }
 
+    //ステージのステートに応じた「ゲームオブジェクト」を取得する関数
     GameObject GetStage(StageState state, GameObject[] stageType)
     {
         switch(state)
@@ -125,7 +142,7 @@ public class AutoStage : Actor
         }
     }
 
-    //
+    //ステージが今何ステージ目なのかを表す「ステート」を取得する関数
     StageState GetStageState(int STAGE_ID)
     {
         switch(STAGE_ID)
@@ -141,6 +158,7 @@ public class AutoStage : Actor
         }
     }
 
+    //ステージを生成するおおもとのオブジェクトを破棄
     void DestroyStage()
     {
         GameObject oldStage = StageList[0];

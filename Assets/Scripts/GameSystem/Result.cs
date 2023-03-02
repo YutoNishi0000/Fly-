@@ -11,12 +11,13 @@ public class Result : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        RESULT.text = "スコア：" + GameManager.Instance.GetTotalScore();
+        //リザルト表示を行う
+        RESULT.text = "スコア：" + GameManager.Instance.GetTotalScore() + "pt";
         if(GameManager.Instance.GetTotalScore() > GameManager.Instance.GetHighScore())
         {
             GameManager.Instance.SetHighScore(GameManager.Instance.GetTotalScore());
         }
 
-        HIGH_SCORE.text = "ハイスコア：" + GameManager.Instance.GetHighScore();
+        HIGH_SCORE.text = "ハイスコア：" + GameManager.Instance.GetHighScore() + "pt";
     }
 }
