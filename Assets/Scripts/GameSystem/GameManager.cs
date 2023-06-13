@@ -65,6 +65,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         DifficulityManager(numStage);
+        EndApplication();
     }
 
     public void InitializeGame()
@@ -121,6 +122,16 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+
+    //アプリケーションを終了させる関数
+    public void EndApplication()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+    }
+
 
     //ゲームの難易度を管理するクラスのインスタンスを取得
     public StageDifficultyComponent GetStageDifficultComponent()

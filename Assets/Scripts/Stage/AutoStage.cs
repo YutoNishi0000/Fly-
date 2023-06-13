@@ -19,7 +19,7 @@ public class AutoStage : Actor
     [SerializeField] private Text stage;
     [SerializeField] private Text explain;
     [SerializeField] private GameObject frame;
-    private readonly float SHOW_TIME = 0.8f;     //実際にステージ生成させる何秒前に何ステージ目かを表すテキストを表示させるか
+    private readonly float SHOW_TIME = 0.5f;     //実際にステージ生成させる何秒前に何ステージ目かを表すテキストを表示させるか
 
     private enum StageState
     {

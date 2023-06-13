@@ -14,13 +14,9 @@ public class CreateObstacles : MonoBehaviour
     //âΩÅ~âΩÉ}ÉXÇ…Ç∑ÇÈÇ©
     private readonly int BLOCK_NUM = 4;
 
-    //âΩâHê∂ê¨Ç∑ÇÈÇ©
-    private readonly int BIRDS_NUM = 7;
-
     private Field _field;
 
     private List<int> _birdsNum = new List<int>();
-    private List<GameObject> obstaclesList = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
